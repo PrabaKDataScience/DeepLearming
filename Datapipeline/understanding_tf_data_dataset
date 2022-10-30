@@ -1,0 +1,863 @@
+{
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 62,
+      "metadata": {
+        "id": "evTVJXUrj29Y"
+      },
+      "outputs": [],
+      "source": [
+        "import tensorflow as tf"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "xI2hRxooj29Z"
+      },
+      "source": [
+        "<h3 style='color:purple'>Create tf dataset from a list</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 63,
+      "metadata": {
+        "scrolled": true,
+        "id": "bYTU777Hj29b",
+        "outputId": "6871c10c-0e04-4476-cc2f-ec14d3c519bc",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<TensorSliceDataset element_spec=TensorSpec(shape=(), dtype=tf.int32, name=None)>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 63
+        }
+      ],
+      "source": [
+        "daily_sales_numbers = [21, 22, -108, 31, -1, 32, 34,31]\n",
+        "\n",
+        "tf_dataset = tf.data.Dataset.from_tensor_slices(daily_sales_numbers)\n",
+        "tf_dataset"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "Ar0J7zgmj29c"
+      },
+      "source": [
+        "<h3 style='color:purple'>Iterate through tf dataset</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 64,
+      "metadata": {
+        "scrolled": true,
+        "id": "_ZvvlT7gj29c",
+        "outputId": "2339be74-7a48-4f23-d7f7-1a66e4bda83a",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "21\n",
+            "22\n",
+            "-108\n",
+            "31\n",
+            "-1\n",
+            "32\n",
+            "34\n",
+            "31\n"
+          ]
+        }
+      ],
+      "source": [
+        "for sales in tf_dataset:\n",
+        "    print(sales.numpy())"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "rCc2cRqJj29d"
+      },
+      "source": [
+        "<h3 style='color:purple'>Iterate through elements as numpy elements</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 65,
+      "metadata": {
+        "id": "Z3frLt7Yj29d",
+        "outputId": "5dee9e58-f480-4466-9b49-87dbf1e8f9aa",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "21\n",
+            "22\n",
+            "-108\n",
+            "31\n",
+            "-1\n",
+            "32\n",
+            "34\n",
+            "31\n"
+          ]
+        }
+      ],
+      "source": [
+        "for sales in tf_dataset.as_numpy_iterator():\n",
+        "    print(sales)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "us6Qzo5jj29d"
+      },
+      "source": [
+        "<h3 style='color:purple'>Iterate through first n elements in tf dataset</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 66,
+      "metadata": {
+        "scrolled": true,
+        "id": "X5AGcnKIj29d",
+        "outputId": "d4832497-951a-4e0f-c0bc-45813febeec3",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "21\n",
+            "22\n",
+            "-108\n"
+          ]
+        }
+      ],
+      "source": [
+        "for sales in tf_dataset.take(3):\n",
+        "    print(sales.numpy())"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "0TBfkbgyj29e"
+      },
+      "source": [
+        "<h3 style='color:purple'>Filter sales numbers that are < 0</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 67,
+      "metadata": {
+        "scrolled": false,
+        "id": "GoQT78xgj29e",
+        "outputId": "847d24e1-005d-49d1-c9fc-5b0f74ffd454",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "21\n",
+            "22\n",
+            "31\n",
+            "32\n",
+            "34\n",
+            "31\n"
+          ]
+        }
+      ],
+      "source": [
+        "tf_dataset = tf_dataset.filter(lambda x: x>0)\n",
+        "for sales in tf_dataset.as_numpy_iterator():\n",
+        "    print(sales)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "ZFc_N6fcj29e"
+      },
+      "source": [
+        "<h3 style='color:purple'>Convert sales numbers from USA dollars ($) to Indian Rupees (INR) Assuming 1->72 conversation rate</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 68,
+      "metadata": {
+        "scrolled": false,
+        "id": "2M4UL0Opj29e",
+        "outputId": "fa3c4653-da1b-497f-dacd-08b89de4f7b8",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "1512\n",
+            "1584\n",
+            "2232\n",
+            "2304\n",
+            "2448\n",
+            "2232\n"
+          ]
+        }
+      ],
+      "source": [
+        "tf_dataset = tf_dataset.map(lambda x: x*72)\n",
+        "for sales in tf_dataset.as_numpy_iterator():\n",
+        "    print(sales)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "esw-3Vknj29f"
+      },
+      "source": [
+        "<h3 style='color:purple'>Shuffe</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 69,
+      "metadata": {
+        "id": "p_laU1sdj29f",
+        "outputId": "9d976ac1-b1dc-44bb-9b39-4e92abab716d",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "1512\n",
+            "2232\n",
+            "2304\n",
+            "1584\n",
+            "2232\n",
+            "2448\n"
+          ]
+        }
+      ],
+      "source": [
+        "tf_dataset = tf_dataset.shuffle(2)\n",
+        "for sales in tf_dataset.as_numpy_iterator():\n",
+        "    print(sales)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "iD7HYj4_j29f"
+      },
+      "source": [
+        "https://stackoverflow.com/questions/53514495/what-does-batch-repeat-and-shuffle-do-with-tensorflow-dataset"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "DXaSjJfwj29f"
+      },
+      "source": [
+        "<h3 style='color:purple'>Batching</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 70,
+      "metadata": {
+        "scrolled": true,
+        "id": "YzIdpMC3j29f",
+        "outputId": "a1e81588-4e1e-456f-a091-92a39b4fa6af",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[1584 1512]\n",
+            "[2304 2448]\n",
+            "[2232 2232]\n"
+          ]
+        }
+      ],
+      "source": [
+        "for sales_batch in tf_dataset.batch(2):\n",
+        "    print(sales_batch.numpy())"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "1CG2RF7Tj29g"
+      },
+      "source": [
+        "<h3 style='color:purple'>Perform all of the above operations in one shot</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 71,
+      "metadata": {
+        "scrolled": true,
+        "id": "gEtPlyKxj29g",
+        "outputId": "2d746178-3261-4b0f-a357-f1251480c14b",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[1512 2232 1584]\n",
+            "[2448 2304 2232]\n"
+          ]
+        }
+      ],
+      "source": [
+        "tf_dataset = tf.data.Dataset.from_tensor_slices(daily_sales_numbers)\n",
+        "\n",
+        "tf_dataset = tf_dataset.filter(lambda x: x>0).map(lambda y: y*72).shuffle(2).batch(3)\n",
+        "for sales in tf_dataset.as_numpy_iterator():\n",
+        "    print(sales)"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "uvWGhWnzj29g"
+      },
+      "source": [
+        "<h3>Images</h3>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!git clone https://github.com/codebasics/deep-learning-keras-tf-tutorial.git"
+      ],
+      "metadata": {
+        "id": "8vKb-q28lQh7",
+        "outputId": "a645a894-224a-4d4e-def0-1ded29d5e7f9",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": 72,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "fatal: destination path 'deep-learning-keras-tf-tutorial' already exists and is not an empty directory.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 73,
+      "metadata": {
+        "id": "QZhi01_qj29h"
+      },
+      "outputs": [],
+      "source": [
+        "images_ds = tf.data.Dataset.list_files('/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/*/*', shuffle=False)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 74,
+      "metadata": {
+        "id": "b54-yJ9gj29h",
+        "outputId": "070a8834-1e23-46cf-a885-2579daaf844f",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "130"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 74
+        }
+      ],
+      "source": [
+        "image_count = len(images_ds)\n",
+        "image_count"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 75,
+      "metadata": {
+        "id": "AeCdCjqHj29h",
+        "outputId": "ed876467-a882-423b-e791-9e2a9c2e38c3",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "tensorflow.python.data.ops.dataset_ops.TensorSliceDataset"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 75
+        }
+      ],
+      "source": [
+        "type(images_ds)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 76,
+      "metadata": {
+        "id": "_p5-ldrPj29h",
+        "outputId": "0f7bebec-b371-4212-bbce-00e301e8168c",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "b'/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/cat/20 Reasons Why Cats Make the Best Pets....jpg'\n",
+            "b'/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/cat/7 Foods Your Cat Can_t Eat.jpg'\n",
+            "b'/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/cat/A cat appears to have caught the....jpg'\n"
+          ]
+        }
+      ],
+      "source": [
+        "for file in images_ds.take(3):\n",
+        "    print(file.numpy())"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 77,
+      "metadata": {
+        "id": "gUkTf1Dlj29i",
+        "outputId": "3c42de50-b1bd-4870-b380-7ea6c71c8f99",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "b'/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/cat/International Cat Care _ The ultimate....jpg'\n",
+            "b'/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/dog/The 20 Best Dog Breeds for Runners....jpg'\n",
+            "b'/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/cat/Why Cats Sniff Rear Ends _ VCA Animal....png'\n"
+          ]
+        }
+      ],
+      "source": [
+        "images_ds = images_ds.shuffle(200)\n",
+        "for file in images_ds.take(3):\n",
+        "    print(file.numpy())"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 78,
+      "metadata": {
+        "id": "lImeaGOUj29i"
+      },
+      "outputs": [],
+      "source": [
+        "class_names = [\"cat\",\"dog\"]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 79,
+      "metadata": {
+        "id": "RlrfPRovj29i"
+      },
+      "outputs": [],
+      "source": [
+        "train_size = int(image_count*0.8)\n",
+        "train_ds = images_ds.take(train_size)\n",
+        "test_ds = images_ds.skip(train_size)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 80,
+      "metadata": {
+        "id": "BR7MXRk_j29i",
+        "outputId": "cb965ff2-4a72-4b2f-ae5b-e2d00cfbda65",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "104"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 80
+        }
+      ],
+      "source": [
+        "len(train_ds)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 81,
+      "metadata": {
+        "id": "GjbJwAdmj29i",
+        "outputId": "200f9573-bce9-4e88-b0c8-0c586802e68c",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "26"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 81
+        }
+      ],
+      "source": [
+        "len(test_ds)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 82,
+      "metadata": {
+        "id": "FYTz8Es2j29j"
+      },
+      "outputs": [],
+      "source": [
+        "def get_label(file_path):\n",
+        "    import os\n",
+        "    parts = tf.strings.split(file_path, os.path.sep)\n",
+        "    # print (parts[-2])\n",
+        "    return parts[-2]"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 83,
+      "metadata": {
+        "scrolled": true,
+        "id": "PacEU7kfj29j",
+        "outputId": "2d517cb4-f091-4eab-c4a1-3148a821a2a1",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<tf.Tensor: shape=(), dtype=string, numpy=b'dog'>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 83
+        }
+      ],
+      "source": [
+        "get_label(\"/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/dog/20 Reasons Why Cats Make the Best Pets....jpg\")"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 84,
+      "metadata": {
+        "id": "vIInXW3gj29j"
+      },
+      "outputs": [],
+      "source": [
+        "def process_image(file_path):\n",
+        "    label = get_label(file_path)\n",
+        "    img = tf.io.read_file(file_path) # load the raw data from the file as a string\n",
+        "    img = tf.image.decode_jpeg(img)\n",
+        "    img = tf.image.resize(img, [128, 128])\n",
+        "    return img, label"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 85,
+      "metadata": {
+        "scrolled": false,
+        "id": "a3qXKtenj29j"
+      },
+      "outputs": [],
+      "source": [
+        "img, label = process_image(\"/content/deep-learning-keras-tf-tutorial/44_tf_data_pipeline/images/cat/7 Foods Your Cat Can_t Eat.jpg\")\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 86,
+      "metadata": {
+        "id": "8xl9jX-bj29j"
+      },
+      "outputs": [],
+      "source": [
+        "train_ds = train_ds.map(process_image)\n",
+        "test_ds = test_ds.map(process_image)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 87,
+      "metadata": {
+        "id": "it_kCA_Ej29j",
+        "outputId": "52a19818-fa63-4831-b023-30dca72cb4cd",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "**** tf.Tensor(\n",
+            "[[[155.       186.       215.      ]\n",
+            "  [156.       187.       216.      ]\n",
+            "  [158.       189.       218.      ]\n",
+            "  ...\n",
+            "  [ 90.99609   84.99609   72.99609 ]\n",
+            "  [ 92.        86.        74.      ]\n",
+            "  [ 93.        87.        75.      ]]\n",
+            "\n",
+            " [[156.01172  187.01172  216.01172 ]\n",
+            "  [157.02344  188.02344  217.02344 ]\n",
+            "  [159.01172  190.01172  219.01172 ]\n",
+            "  ...\n",
+            "  [ 86.98828   82.97656   74.01172 ]\n",
+            "  [ 89.97656   85.96484   77.      ]\n",
+            "  [ 91.        86.98828   78.02344 ]]\n",
+            "\n",
+            " [[159.       190.       219.      ]\n",
+            "  [160.       191.       220.      ]\n",
+            "  [161.01953  192.01953  221.01953 ]\n",
+            "  ...\n",
+            "  [ 80.96094   77.96094   72.96094 ]\n",
+            "  [ 85.        82.        77.      ]\n",
+            "  [ 87.        84.        79.      ]]\n",
+            "\n",
+            " ...\n",
+            "\n",
+            " [[ 91.09766   44.98047   73.17578 ]\n",
+            "  [108.25781   83.16016   86.25781 ]\n",
+            "  [ 36.058594  33.058594  18.058594]\n",
+            "  ...\n",
+            "  [ 51.234375  32.214844  34.195312]\n",
+            "  [ 41.078125  18.078125  26.078125]\n",
+            "  [ 38.941406  24.941406  23.941406]]\n",
+            "\n",
+            " [[141.90625  123.88281  111.91797 ]\n",
+            "  [ 69.91797   58.89453   40.91797 ]\n",
+            "  [ 36.        30.        16.      ]\n",
+            "  ...\n",
+            "  [ 76.07031   62.058594  53.08203 ]\n",
+            "  [ 69.11719   50.117188  44.117188]\n",
+            "  [ 45.929688  32.941406  16.964844]]\n",
+            "\n",
+            " [[137.01562  117.015625 118.00781 ]\n",
+            "  [ 31.148438  19.148438   7.140625]\n",
+            "  [ 49.960938  43.960938  27.960938]\n",
+            "  ...\n",
+            "  [ 72.00781   47.01172   65.98828 ]\n",
+            "  [ 73.98047   40.98828   59.972656]\n",
+            "  [ 62.960938  35.96875   42.953125]]], shape=(128, 128, 3), dtype=float32)\n",
+            "**** tf.Tensor(b'cat', shape=(), dtype=string)\n"
+          ]
+        }
+      ],
+      "source": [
+        "for image, label in train_ds.take(1):\n",
+        "    print(\"****\",image)\n",
+        "    print(\"****\",label)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "train_ds"
+      ],
+      "metadata": {
+        "id": "V_iyeSYKpipJ",
+        "outputId": "cbb15b3a-0112-4407-8922-b28c108944a3",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "execution_count": 88,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<MapDataset element_spec=(TensorSpec(shape=(128, 128, None), dtype=tf.float32, name=None), TensorSpec(shape=(), dtype=tf.string, name=None))>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 88
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 89,
+      "metadata": {
+        "id": "E8QV5_P2j29k"
+      },
+      "outputs": [],
+      "source": [
+        "def scale(image, label):\n",
+        "    return image/255, label"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 90,
+      "metadata": {
+        "id": "mQAkTc0bj29k"
+      },
+      "outputs": [],
+      "source": [
+        "train_ds = train_ds.map(scale)"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 91,
+      "metadata": {
+        "scrolled": true,
+        "id": "S-8xZv04j29k",
+        "outputId": "3ba9b60f-f870-4eee-8501-8d34c60c37ab",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        }
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "****Image:  [0.5641021  0.7248864  0.84253347]\n",
+            "****Label:  b'dog'\n",
+            "****Image:  [0.60398287 0.6628064  0.6510417 ]\n",
+            "****Label:  b'dog'\n",
+            "****Image:  [0.31072304 0.31072304 0.31072304]\n",
+            "****Label:  b'dog'\n",
+            "****Image:  [0.8432598  0.8079657  0.74129903]\n",
+            "****Label:  b'dog'\n",
+            "****Image:  [0.6878983  0.69181985 0.672212  ]\n",
+            "****Label:  b'cat'\n"
+          ]
+        }
+      ],
+      "source": [
+        "for image, label in train_ds.take(5):\n",
+        "    print(\"****Image: \",image.numpy()[0][0])\n",
+        "    print(\"****Label: \",label.numpy())"
+      ]
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    },
+    "language_info": {
+      "codemirror_mode": {
+        "name": "ipython",
+        "version": 3
+      },
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "nbconvert_exporter": "python",
+      "pygments_lexer": "ipython3",
+      "version": "3.8.5"
+    },
+    "colab": {
+      "provenance": []
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 0
+}
